@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:gfe="http://www.springframework.org/schema/gemfire"
+       xsi:schemaLocation="http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <gfe:cache-server id="advanced-config" auto-startup="true"
+                      bind-address="localhost" port="40404" host-name-for-clients="localhost"
+                      load-poll-interval="2000" max-connections="22" max-threads="16"
+                      max-message-count="1000" max-time-between-pings="30000"
+                      groups="test-server">
+
+        <gfe:subscription-config eviction-type="ENTRY" capacity="1000" disk-store="file://${java.io.tmpdir}"/>
+    </gfe:cache-server>
+
+    <beans profile="default">
+        <gfe:cache use-bean-factory-locator="false"/>
+    </beans>
+
+    <beans>
+        <gfe:replicated-region id="Person"/>
+    </beans>
+
+    <!-- If the 'pdx' profile is activated, pdx type information will be persisted using the configured disk store -->
+    <beans profile="pdx">
+        <gfe:cache pdx-serializer-ref="mappingPdxSerializer" pdx-persistent="true" pdx-disk-store="pdx-disk-store"/>
+
+        <bean id="mappingPdxSerializer" class="org.springframework.data.gemfire.mapping.MappingPdxSerializer"/>
+
+        <gfe:disk-store id="pdx-disk-store">
+            <gfe:disk-dir location="pdx"/>
+        </gfe:disk-store>
+
+    </beans>
+</beans>
